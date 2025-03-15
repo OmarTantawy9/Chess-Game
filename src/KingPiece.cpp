@@ -1,0 +1,17 @@
+#include "../include/KingPiece.h"
+
+KingPiece::KingPiece(int row, int col, char symbol, std::string color) 
+    : ChessPiece(row, col, symbol, color) {}
+
+KingPiece::~KingPiece() = default;
+
+bool KingPiece::isValidMove(const int &row, const int &col) {
+    
+}
+
+void KingPiece::moveTo(const int &row, const int &col){
+    if(!isValidMove(row, col)) throw invalidMoveException("Invalid move");
+    
+    this->row = row;
+    this->col = col;
+}
