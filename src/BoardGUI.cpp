@@ -43,71 +43,71 @@ void BoardGUI::display() {
                 }
             }
 
-            pieceSprites.at("white-rook").setPosition({0, 0});
-            window.draw(pieceSprites.at("white-rook"));
-
-            pieceSprites.at("white-rook").setPosition({7 * TILE_SIZE, -5});
-            window.draw(pieceSprites.at("white-rook"));
-
-            pieceSprites.at("white-knight").setPosition({1 * TILE_SIZE, -5});
-            window.draw(pieceSprites.at("white-knight"));
-
-
-            pieceSprites.at("white-knight").setPosition({6 * TILE_SIZE, -5});
-            window.draw(pieceSprites.at("white-knight"));
-            
-            pieceSprites.at("white-bishop").setPosition({2 * TILE_SIZE, -5});
-            window.draw(pieceSprites.at("white-bishop"));
-
-
-            pieceSprites.at("white-bishop").setPosition({5 * TILE_SIZE, -5});
-            window.draw(pieceSprites.at("white-bishop"));
-
-
-            pieceSprites.at("white-queen").setPosition({3  * TILE_SIZE, -5});
-            window.draw(pieceSprites.at("white-queen"));
-
-            pieceSprites.at("white-king").setPosition({4  * TILE_SIZE, -5});
-            window.draw(pieceSprites.at("white-king"));
-
-
-            for(int col = 0; col < pieceTextures.size() ; ++col){
-                pieceSprites.at("white-pawn").setPosition({col * TILE_SIZE, TILE_SIZE - 5});
-                window.draw(pieceSprites.at("white-pawn"));
-            }
-
-
-            pieceSprites.at("black-rook").setPosition({0, 7 * TILE_SIZE - 5});
+            pieceSprites.at("black-rook").setPosition({0, 0});
             window.draw(pieceSprites.at("black-rook"));
 
-            pieceSprites.at("black-rook").setPosition({7 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            pieceSprites.at("black-rook").setPosition({7 * TILE_SIZE, -5});
             window.draw(pieceSprites.at("black-rook"));
 
-            pieceSprites.at("black-knight").setPosition({1 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            pieceSprites.at("black-knight").setPosition({1 * TILE_SIZE, -5});
             window.draw(pieceSprites.at("black-knight"));
 
 
-            pieceSprites.at("black-knight").setPosition({6 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            pieceSprites.at("black-knight").setPosition({6 * TILE_SIZE, -5});
             window.draw(pieceSprites.at("black-knight"));
             
-            pieceSprites.at("black-bishop").setPosition({2 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            pieceSprites.at("black-bishop").setPosition({2 * TILE_SIZE, -5});
             window.draw(pieceSprites.at("black-bishop"));
 
 
-            pieceSprites.at("black-bishop").setPosition({5 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            pieceSprites.at("black-bishop").setPosition({5 * TILE_SIZE, -5});
             window.draw(pieceSprites.at("black-bishop"));
 
 
-            pieceSprites.at("black-queen").setPosition({3  * TILE_SIZE, 7 * TILE_SIZE - 5});
+            pieceSprites.at("black-queen").setPosition({3  * TILE_SIZE, -5});
             window.draw(pieceSprites.at("black-queen"));
 
-            pieceSprites.at("black-king").setPosition({4  * TILE_SIZE, 7 * TILE_SIZE - 5});
+            pieceSprites.at("black-king").setPosition({4  * TILE_SIZE, -5});
             window.draw(pieceSprites.at("black-king"));
 
 
             for(int col = 0; col < pieceTextures.size() ; ++col){
-                pieceSprites.at("black-pawn").setPosition({col * TILE_SIZE, 6 * TILE_SIZE -  5});
+                pieceSprites.at("black-pawn").setPosition({col * TILE_SIZE, TILE_SIZE - 5});
                 window.draw(pieceSprites.at("black-pawn"));
+            }
+
+
+            pieceSprites.at("white-rook").setPosition({0, 7 * TILE_SIZE - 5});
+            window.draw(pieceSprites.at("white-rook"));
+
+            pieceSprites.at("white-rook").setPosition({7 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            window.draw(pieceSprites.at("white-rook"));
+
+            pieceSprites.at("white-knight").setPosition({1 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            window.draw(pieceSprites.at("white-knight"));
+
+
+            pieceSprites.at("white-knight").setPosition({6 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            window.draw(pieceSprites.at("white-knight"));
+            
+            pieceSprites.at("white-bishop").setPosition({2 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            window.draw(pieceSprites.at("white-bishop"));
+
+
+            pieceSprites.at("white-bishop").setPosition({5 * TILE_SIZE, 7 * TILE_SIZE - 5});
+            window.draw(pieceSprites.at("white-bishop"));
+
+
+            pieceSprites.at("white-queen").setPosition({3  * TILE_SIZE, 7 * TILE_SIZE - 5});
+            window.draw(pieceSprites.at("white-queen"));
+
+            pieceSprites.at("white-king").setPosition({4  * TILE_SIZE, 7 * TILE_SIZE - 5});
+            window.draw(pieceSprites.at("white-king"));
+
+
+            for(int col = 0; col < pieceTextures.size() ; ++col){
+                pieceSprites.at("white-pawn").setPosition({col * TILE_SIZE, 6 * TILE_SIZE -  5});
+                window.draw(pieceSprites.at("white-pawn"));
             }
 
 

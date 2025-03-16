@@ -6,12 +6,15 @@
 class RookPiece : public ChessPiece{
 public:
 
+    inline static const int value = 5;
+
+
     RookPiece() = delete;
-    RookPiece(int row, int col, char symbol, std::string color);
+    RookPiece(int row, int col, std::string color);
     ~RookPiece() noexcept;
 
 
-    bool isValidMove(const int &row, const int &col) override;
+    bool isValidMove(const int &row, const int &col, const Board &board) override;
     void moveTo(const int &row, const int& col) override;
 };
 

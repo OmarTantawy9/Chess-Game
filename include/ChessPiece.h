@@ -3,21 +3,27 @@
 
 #include <string>
 
+class Board;
+
 class ChessPiece {
 
 protected:
     int row;
     int col;
-    char symbol;
     std::string color;
     
     public:
     ChessPiece() = delete;
-    ChessPiece(int row, int col, char symbol, std::string color);
+    ChessPiece(int row, int col, std::string color);
     virtual ~ChessPiece() noexcept;
 
-    virtual bool isValidMove(const int &row, const int &col) = 0;
+    virtual bool isValidMove(const int &row, const int &col, const Board &board) = 0;
     virtual void moveTo(const int &row, const int &col) = 0;
+
+    std::string getColor(){
+        return color;
+    }
+
 };
 
 class invalidMoveException : public std::exception {

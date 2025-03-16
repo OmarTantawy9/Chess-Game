@@ -1,5 +1,6 @@
 #include "../include/ChessPiece.h"
 #include "../include/BoardGUI.h"
+#include "../include/PawnPiece.h"
 
 
 int main() {

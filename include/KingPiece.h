@@ -6,11 +6,13 @@
 class KingPiece : public ChessPiece{
 public:
 
+    inline static const int value = 100;
+
     KingPiece() = delete;
-    KingPiece(int row, int col, char symbol, std::string color);
+    KingPiece(int row, int col, std::string color);
     ~KingPiece() noexcept;
 
-    bool isValidMove(const int &row, const int &col) override;
+    bool isValidMove(const int &row, const int &col, const Board &board) override;
     void moveTo(const int &row, const int& col) override;
 };
 
