@@ -18,7 +18,7 @@ protected:
     virtual ~ChessPiece() noexcept;
 
     virtual bool isValidMove(const int &row, const int &col, const Board &board) = 0;
-    virtual void moveTo(const int &row, const int &col) = 0;
+    virtual void moveTo(const int &row, const int &col, Board &board) = 0;
 
     std::string getColor(){
         return color;

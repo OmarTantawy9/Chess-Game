@@ -8,6 +8,8 @@ RookPiece::~RookPiece() = default;
 
 bool RookPiece::isValidMove(const int &row, const int &col, const Board &board) {
 
+    if (row == this->row && col == this->col) return false; // No movement
+
     // Ensure the move is within the board bounds
     if (row < 0 || row > 7 || col < 0 || col > 7) return false;
 
@@ -15,21 +17,29 @@ bool RookPiece::isValidMove(const int &row, const int &col, const Board &board) 
     bool isStraightMove = (this->row == row || this->col == col);
     if (!isStraightMove) return false;
 
+
     // Check if path is clear (no pieces in the way)
     if (!board.isPathClear(this->row, this->col, row, col)) return false;
 
+
     // Check if the destination square is occupied
     auto targetPiece = board.getPieceAt(row, col);
-    if (!targetPiece.expired() && targetPiece.lock()->getColor() == color) {
+    if (targetPiece && targetPiece->getColor() == color) {
         return false;  // Cannot capture a friendly piece
     }
+
 
     return true;
 }
 
-void RookPiece::moveTo(const int &row, const int &col){
-    // if(!isValidMove(row, col)) throw invalidMoveException("Invalid move");
+void RookPiece::moveTo(const int &row, const int &col, Board &board) {
+
+    if(!isValidMove(row, col, board)) throw invalidMoveException("Invalid move");
     
+    board.capturePiece(row, col);
+
+    board.movePiece(this->row, this->col, row, col);
+
     this->row = row;
     this->col = col;
 }

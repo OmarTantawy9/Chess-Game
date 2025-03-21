@@ -10,6 +10,8 @@ bool PawnPiece::isValidMove(const int &row, const int &col, const Board &board) 
     int direction = (this->color == "white") ? -1 : 1;  // White moves up (-1), Black moves down (+1)
     int startRow = (this->color == "white") ? 6 : 1;    // White starts at row 6, Black at row 1
 
+    if (row == this->row && col == this->col) return false; // No movement
+
     // Ensure move is within board bounds
     if (row < 0 || row > 7 || col < 0 || col > 7) return false;
 
@@ -17,21 +19,21 @@ bool PawnPiece::isValidMove(const int &row, const int &col, const Board &board) 
     int colDiff = col - this->col;
 
     // Normal forward move (one square)
-    if (colDiff == 0 && rowDiff == direction && !board.getPieceAt(row, col).lock()) {
+    if (colDiff == 0 && rowDiff == direction && !board.getPieceAt(row, col)) {
         return true;
     }
 
     // First move: Two squares forward
     if (colDiff == 0 && rowDiff == 2 * direction && this->row == startRow &&
-        !board.getPieceAt(this->row + direction, col).lock() &&
-        !board.getPieceAt(row, col).lock()) {
+        !board.getPieceAt(this->row + direction, col) &&
+        !board.getPieceAt(row, col)) {
         return true;
     }
 
     // Capture move (diagonal)
     if (std::abs(colDiff) == 1 && rowDiff == direction) {
         auto targetPiece = board.getPieceAt(row, col);
-        if (!targetPiece.expired() && targetPiece.lock()->getColor() != color) {
+        if (targetPiece && targetPiece->getColor() != color) {
             return true;  // Can capture enemy piece
         }
     }
@@ -46,9 +48,14 @@ bool PawnPiece::isValidMove(const int &row, const int &col, const Board &board) 
     return false;
 }
 
-void PawnPiece::moveTo(const int &row, const int &col){
-    // if(!isValidMove(row, col)) throw invalidMoveException("Invalid move");
+void PawnPiece::moveTo(const int &row, const int &col, Board &board){
+
+    if(!isValidMove(row, col, board)) throw invalidMoveException("Invalid move");
     
+    board.capturePiece(row, col);
+
+    board.movePiece(this->row, this->col, row, col);
+
     this->row = row;
     this->col = col;
 }

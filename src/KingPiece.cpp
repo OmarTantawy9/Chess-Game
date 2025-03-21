@@ -22,16 +22,22 @@ bool KingPiece::isValidMove(const int &row, const int &col, const Board &board) 
 
     // Check destination square
     auto targetPiece = board.getPieceAt(row, col);     // maybe implement a callback
-    if (!targetPiece.expired() && targetPiece.lock()->getColor() == color) {
+    if (targetPiece && targetPiece->getColor() == color) {
         return false; // Cannot capture a friendly piece
     }
 
+    return true;
     
 }
 
-void KingPiece::moveTo(const int &row, const int &col){
-    // if(!isValidMove(row, col)) throw invalidMoveException("Invalid move");
+void KingPiece::moveTo(const int &row, const int &col, Board &board) {
+
+    if(!isValidMove(row, col, board)) throw invalidMoveException("Invalid move");
     
+    board.capturePiece(row, col);
+
+    board.movePiece(this->row, this->col, row, col);
+
     this->row = row;
     this->col = col;
 }

@@ -8,6 +8,8 @@ BishopPiece::~BishopPiece() = default;
 
 bool BishopPiece::isValidMove(const int &row, const int &col, const Board &board) {
 
+    if (row == this->row && col == this->col) return false; // No movement
+
     // Ensure move is within board bounds
     if (row < 0 || row > 7 || col < 0 || col > 7) return false;
 
@@ -22,7 +24,7 @@ bool BishopPiece::isValidMove(const int &row, const int &col, const Board &board
 
     // Check if the destination square is occupied
     auto targetPiece = board.getPieceAt(row, col);
-    if (!targetPiece.expired()  && targetPiece.lock()->getColor() == color) {
+    if (targetPiece && targetPiece->getColor() == color) {
         return false; // Cannot capture a friendly piece
     }
 
@@ -31,9 +33,13 @@ bool BishopPiece::isValidMove(const int &row, const int &col, const Board &board
 
 
 
-void BishopPiece::moveTo(const int &row, const int &col){
-    // if(!isValidMove(row, col)) throw invalidMoveException("Invalid move");
+void BishopPiece::moveTo(const int &row, const int &col, Board &board){
+    if(!isValidMove(row, col, board)) throw invalidMoveException("Invalid move");
     
+    board.capturePiece(row, col);
+
+    board.movePiece(this->row, this->col, row, col);
+
     this->row = row;
     this->col = col;
 }
