@@ -9,7 +9,8 @@
 
 #include <iostream>
 
-Board::Board() : board(8, std::vector<ChessPiecePtr>(8)) {
+Board::Board() : board(8, std::vector<ChessPiecePtr>(8)), isWhiteTurn(true), isGameOverFlag(false), winner() {
+
 
     board[0][0] = std::make_shared<RookPiece>  (0, 0, "black");
     board[0][7] = std::make_shared<RookPiece>  (0, 7, "black");
@@ -41,6 +42,11 @@ Board::~Board() = default;
 void Board::capturePiece(int row, int col){
 
     if(!board[row][col]) return;
+
+    if(typeid(*board[row][col]) == typeid(KingPiece)){
+        isGameOverFlag = true;
+        winner = board[row][col]->getColor() == "white" ? "Black Player" : "White Player"; 
+    }
 
     if(board[row][col]->getColor() == "black"){
         blackGraveYard.push_back(std::move(board[row][col]));

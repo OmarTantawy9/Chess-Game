@@ -16,6 +16,7 @@ public:
 
     bool isValidMove(const int &row, const int &col, const Board &board) override;
     void moveTo(const int &row, const int& col, Board &board) override;
+    ValidMoves getValidMoves(const Board &board) override;
 };
 
 

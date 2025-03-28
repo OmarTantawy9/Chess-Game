@@ -7,8 +7,10 @@
 
 int main() {
 
-    BoardGUI boardGUI;
-    boardGUI.display();
+    while(true){
+        BoardGUI boardGUI;
+        boardGUI.display();
+    }
 
     return 0;
 }

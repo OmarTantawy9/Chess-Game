@@ -43,6 +43,37 @@ void QueenPiece::moveTo(const int &row, const int &col, Board &board){
 
     board.movePiece(this->row, this->col, row, col);
 
+    board.switchTurn();
+
     this->row = row;
     this->col = col;
+}
+
+
+ValidMoves QueenPiece::getValidMoves(const Board &board){
+    
+    ValidMoves validMoves;
+    
+    static const int directions[8][2] = {
+        {-1,  0}, {1,  0}, {0, -1}, {0,  1},  // Up, Down, Left, Right (Rook moves)
+        {-1, -1}, {-1, 1}, {1, -1}, {1,  1}   // Diagonals (Bishop moves)
+    };
+
+    for (const auto &dir : directions) {
+        int newRow = this->row + dir[0];
+        int newCol = this->col + dir[1];
+
+        while (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+            if (isValidMove(newRow, newCol, board)) {
+                validMoves.emplace_back(newRow, newCol);
+            } else {
+                break;  // Stop if the move is invalid (blocked or out of bounds)
+            }
+
+            newRow += dir[0];
+            newCol += dir[1];
+        }
+    }
+    
+    return validMoves;
 }

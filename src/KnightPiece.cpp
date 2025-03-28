@@ -37,6 +37,29 @@ void KnightPiece::moveTo(const int &row, const int &col, Board &board){
 
     board.movePiece(this->row, this->col, row, col);
 
+    board.switchTurn();
+
     this->row = row;
     this->col = col;
+}
+
+ValidMoves KnightPiece::getValidMoves(const Board &board){
+    
+    ValidMoves validMoves;
+
+    static const int moves[8][2] = {
+        {-2, -1}, {-2, 1}, {2, -1}, {2, 1},  // Vertical moves
+        {-1, -2}, {-1, 2}, {1, -2}, {1, 2}   // Horizontal moves
+    };
+
+    for (const auto &move : moves) {
+        int newRow = this->row + move[0];
+        int newCol = this->col + move[1];
+
+        if (isValidMove(newRow, newCol, board)) {
+            validMoves.emplace_back(newRow, newCol);
+        }
+    }
+
+    return validMoves;
 }

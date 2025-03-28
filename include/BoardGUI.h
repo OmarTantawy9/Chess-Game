@@ -5,13 +5,15 @@
 #include <unordered_map>
 #include <vector>
 #include <stdexcept>
+#include <optional>
 
 #include "Board.h"
 
 class BoardGUI {
     inline static const int BOARD_SIZE = 8;
-    inline static const int TILE_SIZE = 100; // Each square is 100x100 pixels
+    inline static const int TILE_SIZE = 100;
     inline static const int GRAVEYARD_WIDTH = 300;
+    sf::Font font;
     sf::RenderWindow window;
     Board board;
 
@@ -20,15 +22,19 @@ class BoardGUI {
         sf::Vector2i position; 
         bool isCaptured; 
 
-        ChessPiece(const sf::Texture &texture, sf::Vector2i pos) : sprite(texture), position(pos), isCaptured(false) {
+        ChessPiece(const sf::Texture &texture, const sf::Vector2i &pos) : sprite(texture), position(pos), isCaptured(false) {
             sprite.setPosition({pos.x * TILE_SIZE + GRAVEYARD_WIDTH, pos.y * TILE_SIZE});
             sprite.setScale({0.8f, 0.8f}); // Adjust size
         }
+
+        ChessPiece(const sf::Sprite &sprite, const sf::Vector2i &pos, const bool &isCaptured) 
+        : sprite(sprite), position(pos), isCaptured(isCaptured) {}
+
     };
 
     std::vector<ChessPiece> pieces;
-    std::vector<ChessPiece> whitePiecesGraveyard;
-    std::vector<ChessPiece> blackPiecesGraveyard;
+    // std::vector<ChessPiece> whitePiecesGraveyard;
+    // std::vector<ChessPiece> blackPiecesGraveyard;
 
     std::unordered_map<std::string, sf::Texture> textures; // Texture cache
 
@@ -40,14 +46,14 @@ public:
     void display();
 
 private:
-    void drawBoard();
+    void drawBoard(const std::optional<ChessPiece> &draggedPiece = std::nullopt);
     void drawGravyard();
     void loadTextures();
+    void highlightValidMoves(const ChessPiece &piece);
 
-    void handleMousePress(const sf::Vector2i &mousePos);
+    std::optional<ChessPiece> handleMousePress(const sf::Vector2i &mousePos);
     void handleMouseRelease(const sf::Vector2i &mousePos);
     void handleMouseMove(const sf::Vector2i &mousePos);
-    sf::Vector2i getTilePosition(const sf::Vector2i &mousePos);
     sf::Vector2i getNextWhiteGraveyardPos();
     sf::Vector2i getNextBlackGraveyardPos();
 };

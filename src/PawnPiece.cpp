@@ -56,6 +56,30 @@ void PawnPiece::moveTo(const int &row, const int &col, Board &board){
 
     board.movePiece(this->row, this->col, row, col);
 
+    board.switchTurn();
+
     this->row = row;
     this->col = col;
+}
+
+ValidMoves PawnPiece::getValidMoves(const Board &board){
+    
+    ValidMoves validMoves;
+    
+    static const int whiteMoves[4][2] = {{-1, 0}, {-2, 0}, {-1, -1}, {-1, 1}};
+    static const int blackMoves[4][2] = {{1, 0}, {2, 0}, {1, -1}, {1, 1}};
+
+    const int (*moves)[2] = (color == "white") ? whiteMoves : blackMoves;
+
+    for (int i = 0; i < 4; ++i) {
+        int newRow = this->row + moves[i][0];
+        int newCol = this->col + moves[i][1];
+
+        if (isValidMove(newRow, newCol, board)) {
+            validMoves.emplace_back(newRow, newCol);
+        }
+    }
+
+
+    return validMoves;
 }

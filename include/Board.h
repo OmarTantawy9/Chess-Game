@@ -13,6 +13,9 @@ class Board {
     std::vector<std::vector<ChessPiecePtr>> board;
     std::vector<ChessPiecePtr> whiteGraveYard;
     std::vector<ChessPiecePtr> blackGraveYard;
+    bool isWhiteTurn;
+    bool isGameOverFlag;
+    std::string winner;
 
 public:
     Board();
@@ -24,9 +27,10 @@ public:
         return board[row][col]; 
     }
 
-    // inline ChessPiecePtr getChessPtr(const int &row, const int &col) const{
-    //     return board[row][col];
-    // }
+    inline std::string getPlayerTurn() const { return isWhiteTurn ? "white" : "black" ;} 
+    inline void switchTurn(){isWhiteTurn = !isWhiteTurn;} 
+    inline bool isGameOver() const { return isGameOverFlag;}  
+    inline std::string getWinner() const { return winner;}    
 
     bool isPathClear(int startRow, int startCol, int endRow, int endCol) const;
 

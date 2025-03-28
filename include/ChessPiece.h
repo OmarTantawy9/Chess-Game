@@ -2,6 +2,10 @@
 #define CHESS_PIECE_H
 
 #include <string>
+#include <vector>
+#include <utility>
+
+using ValidMoves = std::vector<std::pair<int, int>>;
 
 class Board;
 
@@ -19,6 +23,7 @@ protected:
 
     virtual bool isValidMove(const int &row, const int &col, const Board &board) = 0;
     virtual void moveTo(const int &row, const int &col, Board &board) = 0;
+    virtual ValidMoves getValidMoves(const Board &board) = 0; 
 
     std::string getColor(){
         return color;

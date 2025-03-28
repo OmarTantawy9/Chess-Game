@@ -10,43 +10,33 @@ BoardGUI::BoardGUI()
     : window(sf::VideoMode({BOARD_SIZE * TILE_SIZE + (2 * GRAVEYARD_WIDTH), BOARD_SIZE * TILE_SIZE}), "Chess Board",
                             sf::Style::Titlebar | sf::Style::Close),
       board() {
+
+    if (!font.openFromFile("./fonts/arial.ttf")) {
+        std::cerr << "Error loading font!" << std::endl;
+        return;
+    }
     
     loadTextures();
 
     std::vector<std::pair<std::string, sf::Vector2i>> initialPositions = {
-        {"black-rook.png",   {0, 0}},
-        {"black-rook.png",   {7, 0}},
-        {"black-knight.png", {1, 0}},
-        {"black-knight.png", {6, 0}},  
-        {"black-bishop.png", {2, 0}},
-        {"black-bishop.png", {5, 0}},  
-        {"black-queen.png",  {3, 0}},
-        {"black-king.png",   {4, 0}}, 
-        {"black-pawn.png",   {0, 1}}, 
-        {"black-pawn.png",   {1, 1}},  
-        {"black-pawn.png",   {2, 1}},  
-        {"black-pawn.png",   {3, 1}},
-        {"black-pawn.png",   {4, 1}}, 
-        {"black-pawn.png",   {5, 1}},  
-        {"black-pawn.png",   {6, 1}},  
-        {"black-pawn.png",   {7, 1}},
         
-        {"white-rook.png",   {0, 7}}, 
-        {"white-rook.png",   {7, 7}},
-        {"white-knight.png", {1, 7}}, 
-        {"white-knight.png", {6, 7}},  
-        {"white-bishop.png", {2, 7}},  
-        {"white-bishop.png", {5, 7}},  
-        {"white-queen.png",  {3, 7}},
-        {"white-king.png",   {4, 7}}, 
-        {"white-pawn.png",   {0, 6}}, 
-        {"white-pawn.png",   {1, 6}},  
-        {"white-pawn.png",   {2, 6}},  
-        {"white-pawn.png",   {3, 6}},
-        {"white-pawn.png",   {4, 6}}, 
-        {"white-pawn.png",   {5, 6}},  
-        {"white-pawn.png",   {6, 6}},  
-        {"white-pawn.png",   {7, 6}}
+        {"black-rook.png",   {0, 0}},       {"white-rook.png",   {0, 7}}, 
+        {"black-rook.png",   {7, 0}},       {"white-rook.png",   {7, 7}},
+        {"black-knight.png", {1, 0}},       {"white-knight.png", {1, 7}}, 
+        {"black-knight.png", {6, 0}},       {"white-knight.png", {6, 7}},    
+        {"black-bishop.png", {2, 0}},       {"white-bishop.png", {2, 7}},  
+        {"black-bishop.png", {5, 0}},       {"white-bishop.png", {5, 7}},    
+        {"black-queen.png",  {3, 0}},       {"white-queen.png",  {3, 7}},
+        {"black-king.png",   {4, 0}},       {"white-king.png",   {4, 7}},  
+        {"black-pawn.png",   {0, 1}},       {"white-pawn.png",   {0, 6}},  
+        {"black-pawn.png",   {1, 1}},       {"white-pawn.png",   {1, 6}},    
+        {"black-pawn.png",   {2, 1}},       {"white-pawn.png",   {2, 6}},    
+        {"black-pawn.png",   {3, 1}},       {"white-pawn.png",   {3, 6}},
+        {"black-pawn.png",   {4, 1}},       {"white-pawn.png",   {4, 6}},  
+        {"black-pawn.png",   {5, 1}},       {"white-pawn.png",   {5, 6}},    
+        {"black-pawn.png",   {6, 1}},       {"white-pawn.png",   {6, 6}},    
+        {"black-pawn.png",   {7, 1}},       {"white-pawn.png",   {7, 6}}
+          
     };
 
     for (auto& [filename, pos] : initialPositions) {
@@ -71,17 +61,21 @@ void BoardGUI::loadTextures() {
     }
 }
 
+
 void BoardGUI::display() {
-    while (window.isOpen()) {
+    std::optional<ChessPiece> draggedPiece;  
+    while (window.isOpen() && !board.isGameOver()) {
+
         while (auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
             } 
             else if (event->is<sf::Event::MouseButtonPressed>()) {
-                handleMousePress(sf::Mouse::getPosition(window));
+                draggedPiece = handleMousePress(sf::Mouse::getPosition(window));
             } 
             else if (event->is<sf::Event::MouseButtonReleased>()) {
                 handleMouseRelease(sf::Mouse::getPosition(window));
+                draggedPiece.reset();
             } 
             else if (event->is<sf::Event::MouseMoved>()) {
                 handleMouseMove(sf::Mouse::getPosition(window));
@@ -90,12 +84,49 @@ void BoardGUI::display() {
 
         window.clear();
         drawGravyard();
+        drawBoard(draggedPiece);
+        window.display();
+    }
+
+    while(window.isOpen()){
+
+
+        while (auto event = window.pollEvent()) {
+            if (event->is<sf::Event::Closed>()) {
+                window.close();
+            } 
+            else if(const auto keyPressed = event->getIf<sf::Event::KeyPressed>()){
+                if(keyPressed->scancode == sf::Keyboard::Scancode::Enter) {
+                    return;
+                }
+            }
+        }
+
+        // Create text for black graveyard
+        sf::Text winnerText(font, board.getWinner() + " is the Winner!", 100);
+        winnerText.setFillColor({242,244,245});
+
+        auto center = winnerText.getGlobalBounds().size / 2.f;
+        auto localBounds = center + winnerText.getLocalBounds().position;
+        sf::Vector2f rounded = {round(localBounds.x), round(localBounds.y)};
+        winnerText.setOrigin(rounded);
+        winnerText.setPosition(sf::Vector2f{ window.getSize() / 2u });
+
+
+        sf::RectangleShape square{{BOARD_SIZE * TILE_SIZE + (2 * GRAVEYARD_WIDTH), BOARD_SIZE * TILE_SIZE}};
+        square.setFillColor({40,44,52, 225});
+        window.clear();
+        drawGravyard();
         drawBoard();
+        window.draw(square);
+        window.draw(winnerText);
         window.display();
     }
 }
 
-void BoardGUI::drawBoard() {
+void BoardGUI::drawBoard(const std::optional<ChessPiece> &draggedPiece) {
+
+    
     for (int row = 0; row < BOARD_SIZE; row++) {
         for (int col = 0; col < BOARD_SIZE; col++) {
             sf::RectangleShape square(sf::Vector2f(TILE_SIZE, TILE_SIZE));
@@ -105,10 +136,20 @@ void BoardGUI::drawBoard() {
         }
     }
 
-
+    if(draggedPiece){
+        auto draggedPiecePtr = board.getPieceAt((*draggedPiece).position.y, (*draggedPiece).position.x);
+        auto validMoves = draggedPiecePtr->getValidMoves(board);
+        for (auto &[y, x] : validMoves) {
+            sf::RectangleShape square{{TILE_SIZE, TILE_SIZE}};
+            square.setPosition({x * TILE_SIZE + GRAVEYARD_WIDTH, y * TILE_SIZE});
+            square.setFillColor({82,139,255, 120});
+            window.draw(square);
+        }
+    }
+    
     for (auto& piece : pieces) {
         window.draw(piece.sprite);
-    }    
+    } 
 }
 
 void BoardGUI::drawGravyard(){
@@ -122,9 +163,6 @@ void BoardGUI::drawGravyard(){
 
     whiteGraveyard.setFillColor({40,44,52});
     whiteGraveyard.setPosition({(TILE_SIZE * BOARD_SIZE) + GRAVEYARD_WIDTH, 0}); 
-
-    // Load font
-    static sf::Font font;
 
     if (!font.openFromFile("./fonts/arial.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
@@ -150,17 +188,37 @@ void BoardGUI::drawGravyard(){
 }
 
 
-void BoardGUI::handleMousePress(const sf::Vector2i &mousePos) {
+std::optional<BoardGUI::ChessPiece> BoardGUI::handleMousePress(const sf::Vector2i &mousePos) {
 
-    if(mousePos.x < GRAVEYARD_WIDTH || mousePos.x >= (GRAVEYARD_WIDTH + (TILE_SIZE * BOARD_SIZE))) return;
+    if(mousePos.x < GRAVEYARD_WIDTH || mousePos.x >= (GRAVEYARD_WIDTH + (TILE_SIZE * BOARD_SIZE))) return std::nullopt;
 
     for (size_t i = 0; i < pieces.size(); ++i) {
         if (pieces[i].sprite.getGlobalBounds().contains(window.mapPixelToCoords(mousePos))) {
+            auto draggedPiecePtr = board.getPieceAt(pieces[i].position.y, pieces[i].position.x);
+            if(draggedPiecePtr->getColor() != board.getPlayerTurn()) return std::nullopt;
             draggedPieceIndex = i;
             dragOffset = pieces[i].sprite.getPosition() - window.mapPixelToCoords(mousePos);
-            return;
+            return {pieces[i]};
+
         }
     }
+    return std::nullopt;
+}
+
+void BoardGUI::highlightValidMoves(const ChessPiece &piece){
+    
+    auto draggedPiecePtr = board.getPieceAt(piece.position.y, piece.position.x);
+    auto validMoves = draggedPiecePtr->getValidMoves(board);
+    for (auto &[y, x] : validMoves) {
+        sf::RectangleShape square;
+        square.setPosition({y * TILE_SIZE + GRAVEYARD_WIDTH, x * TILE_SIZE});
+        square.setFillColor({82,139,255});
+        window.draw(square);
+        std::cout << "Highlighted valid moves" << y << ","  << x << std::endl;
+
+    }
+    
+
 }
 
 void BoardGUI::handleMouseMove(const sf::Vector2i &mousePos) {
@@ -215,7 +273,7 @@ void BoardGUI::handleMouseRelease(const sf::Vector2i &mousePos) {
         // Move the piece in the logic board
         movingPiecePtr->moveTo(newY, newX, board);
         
-        
+
         // Handle capturing
         if (targetPiece) {
             auto getCapturedPiece = [&newX, &newY](const ChessPiece &capturedPiece) {
@@ -256,6 +314,8 @@ void BoardGUI::handleMouseRelease(const sf::Vector2i &mousePos) {
         draggedPiece.sprite.setPosition({oldPos.x * TILE_SIZE + BOARD_OFFSET_X, oldPos.y * TILE_SIZE});
         draggedPiece.position = oldPos;
     }
+
+    
 
     draggedPieceIndex.reset();
 }

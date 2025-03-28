@@ -40,6 +40,22 @@ void BishopPiece::moveTo(const int &row, const int &col, Board &board){
 
     board.movePiece(this->row, this->col, row, col);
 
+    board.switchTurn();
+
     this->row = row;
     this->col = col;
+}
+
+ValidMoves BishopPiece::getValidMoves(const Board &board){
+    
+    ValidMoves validMoves;
+    
+    for (int r = 0; r < 8; ++r) {
+        for (int c = 0; c < 8; ++c) {
+            if (isValidMove(r, c, board)) {
+                validMoves.emplace_back(r, c);
+            }
+        }
+    }
+    return validMoves;
 }
