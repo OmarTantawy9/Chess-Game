@@ -9,6 +9,8 @@
 BoardGUI::BoardGUI() 
     : window(sf::VideoMode({BOARD_SIZE * TILE_SIZE + (2 * GRAVEYARD_WIDTH), BOARD_SIZE * TILE_SIZE}), "Chess Board",
                             sf::Style::Titlebar | sf::Style::Close),
+      whitePos(0, 0), 
+      blackPos(0, 0), 
       board() {
 
     if (!font.openFromFile("./fonts/arial.ttf")) {
@@ -62,7 +64,7 @@ void BoardGUI::loadTextures() {
 }
 
 
-void BoardGUI::display() {
+bool BoardGUI::display() {
     std::optional<ChessPiece> draggedPiece;  
     while (window.isOpen() && !board.isGameOver()) {
 
@@ -90,15 +92,16 @@ void BoardGUI::display() {
 
     while(window.isOpen()){
 
-
         while (auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 window.close();
+                break;
             } 
-            else if(const auto keyPressed = event->getIf<sf::Event::KeyPressed>()){
-                if(keyPressed->scancode == sf::Keyboard::Scancode::Enter) {
-                    return;
-                }
+            else if(event->is<sf::Event::KeyPressed>()){
+                std::cout << "Key Pressed" << std::endl;
+                // if(keyPressed->scancode == sf::Keyboard::Scancode::Enter) {
+                    return true;
+                // }
             }
         }
 
@@ -122,6 +125,8 @@ void BoardGUI::display() {
         window.draw(winnerText);
         window.display();
     }
+
+    return false;
 }
 
 void BoardGUI::drawBoard(const std::optional<ChessPiece> &draggedPiece) {
@@ -321,16 +326,15 @@ void BoardGUI::handleMouseRelease(const sf::Vector2i &mousePos) {
 }
 
 sf::Vector2i BoardGUI::getNextWhiteGraveyardPos(){
-    static sf::Vector2i pos{0, 0};
 
-    auto nextPos = pos;
+    auto nextPos = whitePos;
 
-    if(pos.x != 2){
-        ++pos.x;  
+    if(whitePos.x != 2){
+        ++whitePos.x;  
     }
     else{
-        pos.x = 0;
-        ++pos.y;
+        whitePos.x = 0;
+        ++whitePos.y;
     }
 
     return nextPos;
@@ -338,16 +342,15 @@ sf::Vector2i BoardGUI::getNextWhiteGraveyardPos(){
 
 
 sf::Vector2i BoardGUI::getNextBlackGraveyardPos(){
-    static sf::Vector2i pos{0, 0};
 
-    auto nextPos = pos;
+    auto nextPos = blackPos;
 
-    if(pos.x != 2){
-        ++pos.x;  
+    if(blackPos.x != 2){
+        ++blackPos.x;  
     }
     else{
-        pos.x = 0;
-        ++pos.y;
+        blackPos.x = 0;
+        ++blackPos.y;
     }
 
     return nextPos;

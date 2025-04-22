@@ -13,8 +13,12 @@ class BoardGUI {
     inline static const int BOARD_SIZE = 8;
     inline static const int TILE_SIZE = 100;
     inline static const int GRAVEYARD_WIDTH = 300;
+    
     sf::Font font;
     sf::RenderWindow window;
+    sf::Vector2i whitePos;
+    sf::Vector2i blackPos;
+
     Board board;
 
     struct ChessPiece {
@@ -33,8 +37,6 @@ class BoardGUI {
     };
 
     std::vector<ChessPiece> pieces;
-    // std::vector<ChessPiece> whitePiecesGraveyard;
-    // std::vector<ChessPiece> blackPiecesGraveyard;
 
     std::unordered_map<std::string, sf::Texture> textures; // Texture cache
 
@@ -43,7 +45,7 @@ class BoardGUI {
 
 public:
     BoardGUI();
-    void display();
+    bool display();
 
 private:
     void drawBoard(const std::optional<ChessPiece> &draggedPiece = std::nullopt);
