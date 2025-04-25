@@ -2,6 +2,7 @@
 #define BOARD_H
 
 #include "ChessPiece.h"
+#include "KingPiece.h"
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -29,10 +30,35 @@ public:
 
     inline std::string getPlayerTurn() const { return isWhiteTurn ? "white" : "black" ;} 
     inline void switchTurn(){isWhiteTurn = !isWhiteTurn;} 
-    inline bool isGameOver() const { return isGameOverFlag;}  
+    // inline bool isGameOver() const { return isGameOverFlag;}  
     inline std::string getWinner() const { return winner;}    
 
+
+    bool isGameOver() {
+
+        int possibleMoves = 0;
+
+        for(const auto &pieces : board) {
+            for(const auto &piece : pieces){
+                if(piece && piece->getColor() == getPlayerTurn() && typeid(*piece) != typeid(KingPiece)) 
+                    possibleMoves += piece->getValidMoves(*this).size();
+            }
+        }
+
+        if(!possibleMoves){
+            isGameOverFlag = true;
+            winner = isWhiteTurn ? "Black Player" : "White Player";
+        }
+        
+        return !possibleMoves;
+    }  
+
+
+
     bool isPathClear(int startRow, int startCol, int endRow, int endCol) const;
+    bool isUnderAttack(int row, int col, const std::string &color) const;
+    bool wouldLeaveKingInCheck(const ChessPiece &piece, int newRow, int newCol) const;
+    ChessPiecePtr findKing(const std::string &kingColor) const;
 
     inline void movePiece(const int &oldRow, const int &oldCol, const int &newRow, const int &newCol){
         board[newRow][newCol] = std::move(board[oldRow][oldCol]); 
@@ -54,7 +80,6 @@ public:
     }
 
 };
-
 
 
 #endif //  BOARD_H

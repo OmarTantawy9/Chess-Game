@@ -22,10 +22,14 @@ protected:
     virtual ~ChessPiece() noexcept;
 
     virtual bool isValidMove(const int &row, const int &col, const Board &board) = 0;
+    virtual bool isThreatening(const int &row, const int &col, const Board& board) const = 0;
     virtual void moveTo(const int &row, const int &col, Board &board) = 0;
     virtual ValidMoves getValidMoves(const Board &board) = 0; 
 
-    std::string getColor(){
+    inline int getRow() const {return row;}
+    inline int getCol() const {return col;}
+
+    std::string getColor() const{
         return color;
     }
 

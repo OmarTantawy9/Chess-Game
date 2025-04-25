@@ -28,6 +28,7 @@ bool RookPiece::isValidMove(const int &row, const int &col, const Board &board) 
         return false;  // Cannot capture a friendly piece
     }
 
+    if (board.wouldLeaveKingInCheck(*this, row, col)) return false;
 
     return true;
 }
@@ -72,4 +73,9 @@ ValidMoves RookPiece::getValidMoves(const Board &board){
     }
     
     return validMoves;
+}
+
+bool RookPiece::isThreatening(const int &row, const int &col, const Board& board) const {
+    bool isStraight = this->row == row || this->col == col;
+    return isStraight && board.isPathClear(this->row, this->col, row, col);
 }

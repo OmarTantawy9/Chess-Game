@@ -7,46 +7,51 @@ PawnPiece::PawnPiece(int row, int col, std::string color)
 PawnPiece::~PawnPiece() = default;
 
 bool PawnPiece::isValidMove(const int &row, const int &col, const Board &board) {
-    int direction = (this->color == "white") ? -1 : 1;  // White moves up (-1), Black moves down (+1)
-    int startRow = (this->color == "white") ? 6 : 1;    // White starts at row 6, Black at row 1
+    int dir = (color == "white") ? -1 : 1;
+    int startRow = (color == "white") ? 6 : 1;
 
-    if (row == this->row && col == this->col) return false; // No movement
-
-    // Ensure move is within board bounds
-    if (row < 0 || row > 7 || col < 0 || col > 7) return false;
+    if (row < 0 || row > 7 || col < 0 || col > 7 || (row == this->row && col == this->col)) return false;
 
     int rowDiff = row - this->row;
     int colDiff = col - this->col;
 
-    // Normal forward move (one square)
-    if (colDiff == 0 && rowDiff == direction && !board.getPieceAt(row, col)) {
-        return true;
+    auto forwardOne = board.getPieceAt(row, col);
+    auto forwardTwo = board.getPieceAt(this->row + dir, col);
+
+    // Normal forward
+    if (colDiff == 0 && rowDiff == dir && !forwardOne) {
+        return !board.wouldLeaveKingInCheck(*this, row, col);
     }
 
-    // First move: Two squares forward
-    if (colDiff == 0 && rowDiff == 2 * direction && this->row == startRow &&
-        !board.getPieceAt(this->row + direction, col) &&
-        !board.getPieceAt(row, col)) {
-        return true;
+    // Double move
+    if (colDiff == 0 && rowDiff == 2 * dir && this->row == startRow &&
+        !forwardTwo && !forwardOne) {
+        return !board.wouldLeaveKingInCheck(*this, row, col);
     }
 
-    // Capture move (diagonal)
-    if (std::abs(colDiff) == 1 && rowDiff == direction) {
-        auto targetPiece = board.getPieceAt(row, col);
-        if (targetPiece && targetPiece->getColor() != color) {
-            return true;  // Can capture enemy piece
+    // Capture
+    if (std::abs(colDiff) == 1 && rowDiff == dir) {
+        auto target = board.getPieceAt(row, col);
+        if (target && target->getColor() != color) {
+            return !board.wouldLeaveKingInCheck(*this, row, col);
         }
+
+        // // En Passant
+        // if (board.isEnPassantPossible(this->row, this->col, row, col)) {
+        //     return true;
+        // }
     }
 
-    // // En Passant (special capture)
+    return false;
+}
+
+
+// // En Passant (special capture)
     // if (std::abs(colDiff) == 1 && rowDiff == direction) {
     //     if (board.isEnPassantMove(this->row, this->col, row, col, this->color)) {
     //         return true;
     //     }
     // }
-
-    return false;
-}
 
 void PawnPiece::moveTo(const int &row, const int &col, Board &board){
 
@@ -83,3 +88,9 @@ ValidMoves PawnPiece::getValidMoves(const Board &board){
 
     return validMoves;
 }
+
+bool PawnPiece::isThreatening(const int &row, const int &col, const Board& board) const {
+    int dir = (this->color == "white") ? -1 : 1;
+    return (row == this->row + dir) && (std::abs(col - this->col) == 1);
+}
+

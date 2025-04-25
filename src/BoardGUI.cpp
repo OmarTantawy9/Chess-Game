@@ -10,14 +10,19 @@ BoardGUI::BoardGUI()
     : window(sf::VideoMode({BOARD_SIZE * TILE_SIZE + (2 * GRAVEYARD_WIDTH), BOARD_SIZE * TILE_SIZE}), "Chess Board",
                             sf::Style::Titlebar | sf::Style::Close),
       whitePos(0, 0), 
-      blackPos(0, 0), 
+      blackPos(0, 0),
       board() {
 
     if (!font.openFromFile("./fonts/arial.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
     }
-    
+
+    if(!pieceMoveSound.openFromFile("./audio/move-self.wav")){
+        std::cerr << "Error loading sound!" << std::endl;
+        return;
+    }
+
     loadTextures();
 
     std::vector<std::pair<std::string, sf::Vector2i>> initialPositions = {
@@ -70,7 +75,7 @@ bool BoardGUI::display() {
 
         while (auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
-                window.close();
+                return false;
             } 
             else if (event->is<sf::Event::MouseButtonPressed>()) {
                 draggedPiece = handleMousePress(sf::Mouse::getPosition(window));
@@ -81,6 +86,11 @@ bool BoardGUI::display() {
             } 
             else if (event->is<sf::Event::MouseMoved>()) {
                 handleMouseMove(sf::Mouse::getPosition(window));
+            }
+            else if(auto keyPressed = event->getIf<sf::Event::KeyPressed>()){
+                if(keyPressed->scancode == sf::Keyboard::Scancode::R) {
+                    return true;
+                }
             }
         }
 
@@ -94,14 +104,16 @@ bool BoardGUI::display() {
 
         while (auto event = window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
-                window.close();
-                break;
+                return false;
             } 
-            else if(event->is<sf::Event::KeyPressed>()){
-                std::cout << "Key Pressed" << std::endl;
-                // if(keyPressed->scancode == sf::Keyboard::Scancode::Enter) {
+            else if(auto keyPressed = event->getIf<sf::Event::KeyPressed>()){
+                if(keyPressed->scancode == sf::Keyboard::Scancode::Enter
+                   || keyPressed->scancode == sf::Keyboard::Scancode::NumpadEnter) {
                     return true;
-                // }
+                }
+                else if(keyPressed->scancode == sf::Keyboard::Scancode::Escape) {
+                    return false;
+                }
             }
         }
 
@@ -116,8 +128,16 @@ bool BoardGUI::display() {
         winnerText.setPosition(sf::Vector2f{ window.getSize() / 2u });
 
 
-        sf::RectangleShape square{{BOARD_SIZE * TILE_SIZE + (2 * GRAVEYARD_WIDTH), BOARD_SIZE * TILE_SIZE}};
-        square.setFillColor({40,44,52, 225});
+        sf::RectangleShape square{{BOARD_SIZE * TILE_SIZE + (2 * GRAVEYARD_WIDTH), (BOARD_SIZE * TILE_SIZE) / 3}};
+        
+        center = square.getGlobalBounds().size / 2.f;
+        localBounds = center + square.getLocalBounds().position;
+        rounded = {round(localBounds.x), round(localBounds.y)};
+        square.setOrigin(rounded);
+        square.setPosition(sf::Vector2f{ window.getSize() / 2u });
+
+        square.setFillColor({0,133,115, 225});
+
         window.clear();
         drawGravyard();
         drawBoard();
@@ -126,7 +146,7 @@ bool BoardGUI::display() {
         window.display();
     }
 
-    return false;
+    return true;
 }
 
 void BoardGUI::drawBoard(const std::optional<ChessPiece> &draggedPiece) {
@@ -152,9 +172,46 @@ void BoardGUI::drawBoard(const std::optional<ChessPiece> &draggedPiece) {
         }
     }
     
+    ChessPiece* draggedPiecePtr{nullptr};
+
     for (auto& piece : pieces) {
+        if(draggedPiece
+           && piece.position.x == draggedPiece->position.x 
+           && piece.position.y == draggedPiece->position.y){
+            draggedPiecePtr = &piece;
+            continue;
+           }
         window.draw(piece.sprite);
-    } 
+    }
+
+    if(draggedPiecePtr){
+        window.draw(draggedPiecePtr->sprite);
+    }
+
+    if(board.isGameOver()){
+
+        static bool isFadding = true;
+        static double fadeFactor = 1;
+
+        auto capturedKing = board.findKing(board.getPlayerTurn());
+        sf::RectangleShape square{{TILE_SIZE, TILE_SIZE}};
+        square.setPosition({capturedKing->getCol() * TILE_SIZE + GRAVEYARD_WIDTH, capturedKing->getRow() * TILE_SIZE});
+        
+        fadeFactor += isFadding ? -0.005 : 0.005;
+        
+        if(fadeFactor <= 0){
+            isFadding = false;
+        }
+        else if(fadeFactor >= 1){
+            isFadding = true;
+        }
+
+        sf::Color color;
+        
+        square.setFillColor({254,112,112, 180 * fadeFactor});
+        window.draw(square);
+    }
+
 }
 
 void BoardGUI::drawGravyard(){
@@ -313,6 +370,7 @@ void BoardGUI::handleMouseRelease(const sf::Vector2i &mousePos) {
         // Update the piece's graphical position
         draggedPiece.sprite.setPosition({newX * TILE_SIZE + BOARD_OFFSET_X, newY * TILE_SIZE});
         draggedPiece.position = {newX, newY};
+        pieceMoveSound.play();
 
     } catch (const invalidMoveException &e) {
         std::cout << "Invalid move: (" << newY << ", " << newX << ")" << std::endl;

@@ -31,6 +31,8 @@ bool QueenPiece::isValidMove(const int &row, const int &col, const Board &board)
         return false; // Cannot capture a friendly piece
     }
 
+    if(board.wouldLeaveKingInCheck(*this, row, col)) return false;
+
     return true;
     
 }
@@ -76,4 +78,12 @@ ValidMoves QueenPiece::getValidMoves(const Board &board){
     }
     
     return validMoves;
+}
+
+bool QueenPiece::isThreatening(const int &row, const int &col, const Board& board) const {
+    int rowDiff = std::abs(row - this->row);
+    int colDiff = std::abs(col - this->col);
+    bool isStraight = this->row == row || this->col == col;
+    bool isDiagonal = rowDiff == colDiff;
+    return (isStraight || isDiagonal) && board.isPathClear(this->row, this->col, row, col);
 }

@@ -28,6 +28,8 @@ bool BishopPiece::isValidMove(const int &row, const int &col, const Board &board
         return false; // Cannot capture a friendly piece
     }
 
+    if (board.wouldLeaveKingInCheck(*this, row, col)) return false;
+
     return true;
 }
 
@@ -58,4 +60,9 @@ ValidMoves BishopPiece::getValidMoves(const Board &board){
         }
     }
     return validMoves;
+}
+
+bool BishopPiece::isThreatening(const int &row, const int &col, const Board& board) const {
+    if (std::abs(row - this->row) != std::abs(col - this->col)) return false;
+    return board.isPathClear(this->row, this->col, row, col);
 }

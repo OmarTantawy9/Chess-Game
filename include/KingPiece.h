@@ -13,6 +13,7 @@ public:
     ~KingPiece() noexcept;
 
     bool isValidMove(const int &row, const int &col, const Board &board) override;
+    bool isThreatening(const int &row, const int &col, const Board& board) const override;
     void moveTo(const int &row, const int& col, Board &board) override;
     ValidMoves getValidMoves(const Board &board) override;
 

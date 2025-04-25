@@ -26,6 +26,8 @@ bool KnightPiece::isValidMove(const int &row, const int &col, const Board &board
         return false; // Cannot capture a friendly piece
     }
 
+    if (board.wouldLeaveKingInCheck(*this, row, col)) return false;
+
     return true;
 }
 
@@ -62,4 +64,10 @@ ValidMoves KnightPiece::getValidMoves(const Board &board){
     }
 
     return validMoves;
+}
+
+bool KnightPiece::isThreatening(const int &row, const int &col, const Board& board) const {
+    int rowDiff = std::abs(row - this->row);
+    int colDiff = std::abs(col - this->col);
+    return (rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2);
 }

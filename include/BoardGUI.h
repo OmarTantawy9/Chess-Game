@@ -2,6 +2,7 @@
 #define BOARD_GUI_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <unordered_map>
 #include <vector>
 #include <stdexcept>
@@ -18,6 +19,8 @@ class BoardGUI {
     sf::RenderWindow window;
     sf::Vector2i whitePos;
     sf::Vector2i blackPos;
+    sf::Music pieceMoveSound;
+    
 
     Board board;
 

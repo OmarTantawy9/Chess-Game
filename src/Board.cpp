@@ -67,7 +67,6 @@ bool Board::isPathClear(int startRow, int startCol, int endRow, int endCol) cons
     int currCol = startCol + colStep;
 
     while (currRow != endRow || currCol != endCol) {
-        // std::cout << "(" << currRow << "," <<  currCol << ")" << std::endl;
 
         if (getPieceAt(currRow, currCol)) {
             return false;  // Path is blocked
@@ -83,4 +82,47 @@ bool Board::isPathClear(int startRow, int startCol, int endRow, int endCol) cons
     }
 
     return true;
+}
+
+bool Board::isUnderAttack(int row, int col, const std::string &color) const {
+    for (const auto &pieces : board) {
+        for(const auto &piece : pieces){
+            if (piece && piece->getColor() == color && piece->isThreatening(row, col, *this)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool Board::wouldLeaveKingInCheck(const ChessPiece &piece, int newRow, int newCol) const {
+    
+    auto tempBoard = *this;
+
+    auto oldRow = piece.getRow();
+    auto oldCol = piece.getCol();
+
+    auto capturedPiece = tempBoard.board[newRow][newCol];
+    tempBoard.board[newRow][newCol] = tempBoard.board[oldRow][oldCol];
+
+    auto king = findKing(piece.getColor());
+
+    auto res = tempBoard.isUnderAttack(king->getRow(), king->getCol(), king->getColor());
+
+    tempBoard.board[oldRow][oldCol] = tempBoard.board[newRow][newCol];
+    
+    tempBoard.board[newRow][newCol] = capturedPiece;
+
+    return res;
+}
+
+ChessPiecePtr Board::findKing(const std::string &kingColor) const {
+    for (const auto &pieces : board) {
+        for(const auto &piece : pieces){
+            if(piece && piece->getColor() == kingColor && typeid(*piece) == typeid(KingPiece)){
+                return piece;
+            }
+        }
+    }
+    return {};
 }
