@@ -10,21 +10,24 @@
 #include <mmsystem.h>
 
 BoardGUI::BoardGUI() 
-    : window(sf::VideoMode({BOARD_SIZE * TILE_SIZE + (2 * GRAVEYARD_WIDTH), BOARD_SIZE * TILE_SIZE}), "Chess Board",
+    : window(sf::VideoMode({BOARD_SIZE * TILE_SIZE + (2 * GRAVEYARD_WIDTH), BOARD_SIZE * TILE_SIZE}), "Chess Game - Omar Tantawy",
                             sf::Style::Titlebar | sf::Style::Close),
       whitePos(0, 0), 
       blackPos(0, 0),
       board() {
 
+    sf::Image icon;
+    if (!icon.loadFromFile("./icon/chess-piece.png")) {
+        return;
+    }
+
+    window.setIcon({icon.getSize().x, icon.getSize().y}, icon.getPixelsPtr());
+
+
     if (!font.openFromFile("./fonts/arial.ttf")) {
         std::cerr << "Error loading font!" << std::endl;
         return;
     }
-
-    // if(!pieceMoveSound.openFromFile("./audio/move-self.wav")){
-    //     std::cerr << "Error loading sound!" << std::endl;
-    //     return;
-    // }
 
     loadTextures();
 
