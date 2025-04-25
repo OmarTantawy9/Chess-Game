@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic -I"C:/Program Files/SFML-3.0.0/include"
-LDFLAGS = -L"C:/Program Files/SFML-3.0.0/lib" -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio
+LDFLAGS = -L"C:/Program Files/SFML-3.0.0/lib" -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lwinmm
 SRC_DIR = src
 OBJ_DIR = obj
 TARGET = main

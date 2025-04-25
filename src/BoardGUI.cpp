@@ -6,6 +6,9 @@
 #include <cmath>
 #include <algorithm>
 
+#include <windows.h>
+#include <mmsystem.h>
+
 BoardGUI::BoardGUI() 
     : window(sf::VideoMode({BOARD_SIZE * TILE_SIZE + (2 * GRAVEYARD_WIDTH), BOARD_SIZE * TILE_SIZE}), "Chess Board",
                             sf::Style::Titlebar | sf::Style::Close),
@@ -18,10 +21,10 @@ BoardGUI::BoardGUI()
         return;
     }
 
-    if(!pieceMoveSound.openFromFile("./audio/move-self.wav")){
-        std::cerr << "Error loading sound!" << std::endl;
-        return;
-    }
+    // if(!pieceMoveSound.openFromFile("./audio/move-self.wav")){
+    //     std::cerr << "Error loading sound!" << std::endl;
+    //     return;
+    // }
 
     loadTextures();
 
@@ -370,7 +373,9 @@ void BoardGUI::handleMouseRelease(const sf::Vector2i &mousePos) {
         // Update the piece's graphical position
         draggedPiece.sprite.setPosition({newX * TILE_SIZE + BOARD_OFFSET_X, newY * TILE_SIZE});
         draggedPiece.position = {newX, newY};
-        pieceMoveSound.play();
+        // pieceMoveSound.play();
+
+        PlaySound(TEXT("./audio/move-self.wav"), NULL, SND_FILENAME | SND_ASYNC);
 
     } catch (const invalidMoveException &e) {
         std::cout << "Invalid move: (" << newY << ", " << newX << ")" << std::endl;

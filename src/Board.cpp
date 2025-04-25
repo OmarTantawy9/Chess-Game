@@ -87,7 +87,7 @@ bool Board::isPathClear(int startRow, int startCol, int endRow, int endCol) cons
 bool Board::isUnderAttack(int row, int col, const std::string &color) const {
     for (const auto &pieces : board) {
         for(const auto &piece : pieces){
-            if (piece && piece->getColor() == color && piece->isThreatening(row, col, *this)) {
+            if (piece && piece->getColor() != color && piece->isThreatening(row, col, *this)) {
                 return true;
             }
         }

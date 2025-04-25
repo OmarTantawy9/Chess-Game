@@ -19,7 +19,7 @@ class BoardGUI {
     sf::RenderWindow window;
     sf::Vector2i whitePos;
     sf::Vector2i blackPos;
-    sf::Music pieceMoveSound;
+    // sf::Music pieceMoveSound;
     
 
     Board board;
