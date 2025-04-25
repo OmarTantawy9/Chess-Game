@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <fstream>
 
 #include <windows.h>
 #include <mmsystem.h>
@@ -15,6 +16,13 @@ BoardGUI::BoardGUI()
       whitePos(0, 0), 
       blackPos(0, 0),
       board() {
+
+
+    std::ifstream file("./audio/move-self.wav", std::ios::binary | std::ios::ate);
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg);
+    pieceMoveSound.resize(size);
+    file.read(pieceMoveSound.data(), size);
 
     sf::Image icon;
     if (!icon.loadFromFile("./icon/chess-piece.png")) {
@@ -297,6 +305,7 @@ void BoardGUI::handleMouseMove(const sf::Vector2i &mousePos) {
 
 
 void BoardGUI::handleMouseRelease(const sf::Vector2i &mousePos) {
+
     if (!draggedPieceIndex.has_value()) return;
     
     auto dropPos = window.mapPixelToCoords(mousePos);
@@ -341,7 +350,6 @@ void BoardGUI::handleMouseRelease(const sf::Vector2i &mousePos) {
         // Move the piece in the logic board
         movingPiecePtr->moveTo(newY, newX, board);
         
-
         // Handle capturing
         if (targetPiece) {
             auto getCapturedPiece = [&newX, &newY](const ChessPiece &capturedPiece) {
@@ -376,9 +384,8 @@ void BoardGUI::handleMouseRelease(const sf::Vector2i &mousePos) {
         // Update the piece's graphical position
         draggedPiece.sprite.setPosition({newX * TILE_SIZE + BOARD_OFFSET_X, newY * TILE_SIZE});
         draggedPiece.position = {newX, newY};
-        // pieceMoveSound.play();
-
-        PlaySound(TEXT("./audio/move-self.wav"), NULL, SND_FILENAME | SND_ASYNC);
+        
+        PlaySound(reinterpret_cast<LPCSTR>(pieceMoveSound.data()), NULL, SND_MEMORY | SND_ASYNC);
 
     } catch (const invalidMoveException &e) {
         std::cout << "Invalid move: (" << newY << ", " << newX << ")" << std::endl;

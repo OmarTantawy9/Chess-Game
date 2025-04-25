@@ -19,6 +19,8 @@ class BoardGUI {
     sf::RenderWindow window;
     sf::Vector2i whitePos;
     sf::Vector2i blackPos;
+    std::vector<char> pieceMoveSound;
+
     // sf::Music pieceMoveSound;
     
 
