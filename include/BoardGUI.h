@@ -48,6 +48,7 @@ class BoardGUI {
 
 public:
     BoardGUI();
+    ~BoardGUI() = default;
     bool display();
 
 private:
