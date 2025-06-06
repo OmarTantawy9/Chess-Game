@@ -207,7 +207,7 @@ void BoardGUI::drawBoard(const std::optional<ChessPiece> &draggedPiece) {
         static bool isFadding = true;
         static double fadeFactor = 1;
 
-        auto capturedKing = board.findKing(board.getPlayerTurn());
+        auto capturedKing = board.getKing(board.getPlayerTurn());
         sf::RectangleShape square{{TILE_SIZE, TILE_SIZE}};
         square.setPosition({capturedKing->getCol() * TILE_SIZE + GRAVEYARD_WIDTH, capturedKing->getRow() * TILE_SIZE});
         

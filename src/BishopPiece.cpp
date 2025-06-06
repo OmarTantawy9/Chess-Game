@@ -6,28 +6,22 @@ BishopPiece::BishopPiece(int row, int col, std::string color)
 
 BishopPiece::~BishopPiece() = default;
 
-bool BishopPiece::isValidMove(const int &row, const int &col, const Board &board) {
+bool BishopPiece::isValidMove(const int &row, const int &col, Board &board) {
 
-    if (row == this->row && col == this->col) return false; // No movement
+    if (isSamePosition(row, col)) return false; // No movement
 
     // Ensure move is within board bounds
-    if (row < 0 || row > 7 || col < 0 || col > 7) return false;
-
-    int rowDiff = std::abs(row - this->row);
-    int colDiff = std::abs(col - this->col);
+    if (isOutOfBoard(row, col)) return false;
 
     // Check if it's a diagonal move
-    if (rowDiff != colDiff) return false;
+    if (!isDiagonalMove(row, col)) return false;
 
     // Check if path is clear
     if (!board.isPathClear(this->row, this->col, row, col)) return false;
 
-    // Check if the destination square is occupied
-    auto targetPiece = board.getPieceAt(row, col);
-    if (targetPiece && targetPiece->getColor() == color) {
-        return false; // Cannot capture a friendly piece
-    }
-
+    // Check if the destination square is occupied by friendly piece
+    if (isOccupiedByTeamMate(row, col, board)) return false;
+    
     if (board.wouldLeaveKingInCheck(*this, row, col)) return false;
 
     return true;
@@ -48,7 +42,7 @@ void BishopPiece::moveTo(const int &row, const int &col, Board &board){
     this->col = col;
 }
 
-ValidMoves BishopPiece::getValidMoves(const Board &board){
+ValidMoves BishopPiece::getValidMoves(Board &board){
     
     ValidMoves validMoves;
     
@@ -62,7 +56,4 @@ ValidMoves BishopPiece::getValidMoves(const Board &board){
     return validMoves;
 }
 
-bool BishopPiece::isThreatening(const int &row, const int &col, const Board& board) const {
-    if (std::abs(row - this->row) != std::abs(col - this->col)) return false;
-    return board.isPathClear(this->row, this->col, row, col);
-}
+

@@ -35,6 +35,9 @@ Board::Board() : board(8, std::vector<ChessPiecePtr>(8)), isWhiteTurn(true), isG
     board[7][3] = std::make_shared<QueenPiece> (7, 3, "white");
     board[7][4] = std::make_shared<KingPiece>  (7, 4, "white");
 
+    whiteKing = board[7][4];
+    blackKing = board[0][4];
+
 };
 
 Board::~Board() = default;
@@ -58,8 +61,6 @@ void Board::capturePiece(int row, int col){
 
 bool Board::isPathClear(int startRow, int startCol, int endRow, int endCol) const {
 
-    if (startRow == endRow && startCol == endCol) return false; // Same position
-
     int rowStep = (endRow > startRow) ? 1 : (endRow < startRow) ? -1 : 0;
     int colStep = (endCol > startCol) ? 1 : (endCol < startCol) ? -1 : 0;
 
@@ -68,7 +69,7 @@ bool Board::isPathClear(int startRow, int startCol, int endRow, int endCol) cons
 
     while (currRow != endRow || currCol != endCol) {
 
-        if (getPieceAt(currRow, currCol)) {
+        if (board[currRow][currCol]) {
             return false;  // Path is blocked
         }
 
@@ -84,45 +85,100 @@ bool Board::isPathClear(int startRow, int startCol, int endRow, int endCol) cons
     return true;
 }
 
-bool Board::isUnderAttack(int row, int col, const std::string &color) const {
-    for (const auto &pieces : board) {
-        for(const auto &piece : pieces){
-            if (piece && piece->getColor() != color && piece->isThreatening(row, col, *this)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
 
-bool Board::wouldLeaveKingInCheck(const ChessPiece &piece, int newRow, int newCol) const {
-    
-    auto tempBoard = *this;
+
+bool Board::wouldLeaveKingInCheck(ChessPiece &piece, int newRow, int newCol) {
+
+    auto capturedPiece = getPieceAt(newRow, newCol);
 
     auto oldRow = piece.getRow();
     auto oldCol = piece.getCol();
 
-    auto capturedPiece = tempBoard.board[newRow][newCol];
-    tempBoard.board[newRow][newCol] = tempBoard.board[oldRow][oldCol];
+    auto king = getKing(piece.getColor());
 
-    auto king = findKing(piece.getColor());
+    board[newRow][newCol] = board[oldRow][oldCol];
+    board[oldRow][oldCol] = nullptr;
 
-    auto res = tempBoard.isUnderAttack(king->getRow(), king->getCol(), king->getColor());
+    piece.setRow(newRow);
+    piece.setCol(newCol);
 
-    tempBoard.board[oldRow][oldCol] = tempBoard.board[newRow][newCol];
+    auto isInCheckFlag = isInCheck(king);
+
+    piece.setRow(oldRow);
+    piece.setCol(oldCol);
     
-    tempBoard.board[newRow][newCol] = capturedPiece;
+    board[oldRow][oldCol] = board[newRow][newCol];
+    board[newRow][newCol] = capturedPiece;
 
-    return res;
+
+    return isInCheckFlag;
 }
 
-ChessPiecePtr Board::findKing(const std::string &kingColor) const {
-    for (const auto &pieces : board) {
-        for(const auto &piece : pieces){
-            if(piece && piece->getColor() == kingColor && typeid(*piece) == typeid(KingPiece)){
-                return piece;
+bool Board::isInCheck(const ChessPiecePtr &king) {
+
+
+    auto nextTurnColor = king->getColor() == "white" ? "black" : "white";
+
+    for(const auto &row : board) {
+        for(const auto &piece : row) {
+            if(!piece) continue;
+            if(piece->getColor() != nextTurnColor) continue;
+            
+            auto validMoves = piece->getValidMoves(*this);
+            
+            auto inCheckMove = std::find_if(validMoves.begin(), validMoves.end(), [&king](const auto &p) {
+                return king->getRow() == p.first && king->getCol() == p.second;
+            });
+
+            if(inCheckMove != validMoves.end()){
+                std::cout << "Check!!!" << std::endl;
+                return true;
             }
         }
     }
-    return {};
+
+    return false;
 }
+
+bool Board::isGameOver() {
+    // Get the current player's king
+    auto king = isWhiteTurn ? whiteKing : blackKing;
+
+    // Check if the king is in check
+    if (!isInCheck(king)) {
+        return false;  // Not in check, game continues
+    }
+
+    // Get all pieces of the current player
+    for (const auto &row : board) {
+        for (const auto &piece : row) {
+            if (!piece || piece->getColor() != king->getColor()) {
+                continue;
+            }
+
+            // Get all valid moves for this piece
+            auto validMoves = piece->getValidMoves(*this);
+
+            // If there's at least one valid move that gets out of check, it's not checkmate
+            if (!validMoves.empty()) {
+                return false;
+            }
+        }
+    }
+
+    // If we get here, no piece can make a valid move to get out of check - it's checkmate
+    winner = isWhiteTurn ? "Black Player" : "White Player";
+    return true;
+}
+
+// ChessPiecePtr Board::findKing(const std::string &kingColor) const {
+//     for (const auto &pieces : board) {
+//         for(const auto &piece : pieces){
+//             if(piece && piece->getColor() == kingColor && typeid(*piece) == typeid(KingPiece)){
+//                 return piece;
+//             }
+//         }
+//     }
+//     std::cerr << "didnt find king" << std::endl;
+//     return {};
+// }

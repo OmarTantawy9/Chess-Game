@@ -6,26 +6,19 @@ KnightPiece::KnightPiece(int row, int col, std::string color)
 
 KnightPiece::~KnightPiece() = default;
 
-bool KnightPiece::isValidMove(const int &row, const int &col, const Board &board) {
+bool KnightPiece::isValidMove(const int &row, const int &col, Board &board) {
 
-    if (row == this->row && col == this->col) return false; // No movement
+    if (isSamePosition(row, col)) return false; // No movement
 
     // Ensure the move is within the board bounds
-    if (row < 0 || row > 7 || col < 0 || col > 7) return false;
-
-    int rowDiff = std::abs(row - this->row);
-    int colDiff = std::abs(col - this->col);
+    if (isOutOfBoard(row, col)) return false;
 
     // Check if move follows the L-shape pattern
-    bool isLShape = (rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2);
-    if (!isLShape) return false;
+    if(!isLShapeMove(row, col)) return false;
 
     // Check if the destination square is occupied
-    auto targetPiece = board.getPieceAt(row, col);
-    if (targetPiece && targetPiece->getColor() == color) {
-        return false; // Cannot capture a friendly piece
-    }
-
+    if (isOccupiedByTeamMate(row, col, board)) return false;
+    
     if (board.wouldLeaveKingInCheck(*this, row, col)) return false;
 
     return true;
@@ -45,7 +38,7 @@ void KnightPiece::moveTo(const int &row, const int &col, Board &board){
     this->col = col;
 }
 
-ValidMoves KnightPiece::getValidMoves(const Board &board){
+ValidMoves KnightPiece::getValidMoves(Board &board){
     
     ValidMoves validMoves;
 
@@ -64,10 +57,4 @@ ValidMoves KnightPiece::getValidMoves(const Board &board){
     }
 
     return validMoves;
-}
-
-bool KnightPiece::isThreatening(const int &row, const int &col, const Board& board) const {
-    int rowDiff = std::abs(row - this->row);
-    int colDiff = std::abs(col - this->col);
-    return (rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2);
 }

@@ -6,30 +6,20 @@ QueenPiece::QueenPiece(int row, int col, std::string color)
 
 QueenPiece::~QueenPiece() = default;
 
-bool QueenPiece::isValidMove(const int &row, const int &col, const Board &board) {
+bool QueenPiece::isValidMove(const int &row, const int &col, Board &board) {
 
-    if (row == this->row && col == this->col) return false; // No movement
+    if(isSamePosition(row, col)) return false; // No movement
 
     // Ensure the move is within the board bounds
-    if (row < 0 || row > 7 || col < 0 || col > 7) return false;
+    if(isOutOfBoard(row, col)) return false;
 
-    int rowDiff = std::abs(row - this->row);
-    int colDiff = std::abs(col - this->col);
-
-    // Check if it's a valid queen move (straight-line or diagonal)
-    bool isStraightMove = (row == this->row || col == this->col);
-    bool isDiagonalMove = (rowDiff == colDiff);
-
-    if (!isStraightMove && !isDiagonalMove) return false;
+    if(!isStarightMove(row, col) && !isDiagonalMove(row, col)) return false;
 
     // Check if path is clear
     if (!board.isPathClear(this->row, this->col, row, col)) return false;
 
     // Check if the destination square is occupied
-    auto targetPiece = board.getPieceAt(row, col);
-    if (targetPiece && targetPiece->getColor() == color) {
-        return false; // Cannot capture a friendly piece
-    }
+    if (isOccupiedByTeamMate(row, col, board)) return false;
 
     if(board.wouldLeaveKingInCheck(*this, row, col)) return false;
 
@@ -52,7 +42,7 @@ void QueenPiece::moveTo(const int &row, const int &col, Board &board){
 }
 
 
-ValidMoves QueenPiece::getValidMoves(const Board &board){
+ValidMoves QueenPiece::getValidMoves(Board &board){
     
     ValidMoves validMoves;
     
@@ -78,12 +68,4 @@ ValidMoves QueenPiece::getValidMoves(const Board &board){
     }
     
     return validMoves;
-}
-
-bool QueenPiece::isThreatening(const int &row, const int &col, const Board& board) const {
-    int rowDiff = std::abs(row - this->row);
-    int colDiff = std::abs(col - this->col);
-    bool isStraight = this->row == row || this->col == col;
-    bool isDiagonal = rowDiff == colDiff;
-    return (isStraight || isDiagonal) && board.isPathClear(this->row, this->col, row, col);
 }

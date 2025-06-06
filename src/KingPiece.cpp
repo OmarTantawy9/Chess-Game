@@ -7,51 +7,18 @@ KingPiece::KingPiece(int row, int col, std::string color)
 
 KingPiece::~KingPiece() = default;
 
-bool KingPiece::isValidMove(const int &row, const int &col, const Board &board) {
+bool KingPiece::isValidMove(const int &row, const int &col, Board &board) {
 
     // Board bounds
-    if (row < 0 || row > 7 || col < 0 || col > 7)
-        return false;
+    if(isOutOfBoard(row, col)) return false;
 
-    int rowDiff = std::abs(row - this->row);
-    int colDiff = std::abs(col - this->col);
+    if(!isOneSquareOffset(row, col)) return false;
 
-    auto target = board.getPieceAt(row, col);
-    if (target && target->getColor() == color)
-        return false; // Can't capture own piece
+    if(isOccupiedByTeamMate(row, col, board)) return false;
 
-    std::string opponentColor = (color == "white") ? "black" : "white";
+    if(board.wouldLeaveKingInCheck(*this, row, col)) return false;
 
-    // 1-square move
-    if ((rowDiff <= 1 && colDiff <= 1) && !(rowDiff == 0 && colDiff == 0)) {
-        if (board.isUnderAttack(row, col, opponentColor)) return false;
-        if (board.wouldLeaveKingInCheck(*this, row, col)) return false;
-        return true;
-    }
-
-    // Castling logic
-    if (row == this->row && (col == 2 || col == 6)) {
-        bool isKingside = col == 6;
-        bool isQueenside = col == 2;
-
-        // 1. Can we castle?
-        // if (!board.canCastle(color, isKingside ? "king" : "queen")) return false;
-
-        // 2. Path must be clear
-        int step = isKingside ? 1 : -1;
-        for (int c = this->col + step; c != col + step; c += step) {
-            if (board.getPieceAt(row, c) != nullptr) return false;
-        }
-
-        // 3. Squares must not be under attack (including current, through, and destination)
-        for (int c : {this->col, this->col + step, col}) {
-            if (board.isUnderAttack(row, c, opponentColor)) return false;
-        }
-
-        return true;
-    }
-
-    return false;
+    return true;
 }
 
 void KingPiece::moveTo(const int &row, const int &col, Board &board) {
@@ -68,7 +35,7 @@ void KingPiece::moveTo(const int &row, const int &col, Board &board) {
     this->col = col;
 }
 
-ValidMoves KingPiece::getValidMoves(const Board &board){
+ValidMoves KingPiece::getValidMoves(Board &board){
     
     ValidMoves validMoves;
 
@@ -87,10 +54,4 @@ ValidMoves KingPiece::getValidMoves(const Board &board){
     }
     
     return validMoves;
-}
-
-bool KingPiece::isThreatening(const int &row, const int &col, const Board& board) const {
-    int rowDiff = std::abs(row - this->row);
-    int colDiff = std::abs(col - this->col);
-    return rowDiff <= 1 && colDiff <= 1 && !(rowDiff == 0 && colDiff == 0);
 }

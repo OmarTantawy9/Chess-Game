@@ -13,10 +13,9 @@ public:
     QueenPiece(int row, int col, std::string color);
     ~QueenPiece() noexcept;
 
-    bool isValidMove(const int &row, const int &col, const Board &board) override;
-    bool isThreatening(const int &row, const int &col, const Board& board) const override;
+    bool isValidMove(const int &row, const int &col, Board &board) override;
     void moveTo(const int &row, const int& col, Board &board) override;
-    ValidMoves getValidMoves(const Board &board) override;
+    ValidMoves getValidMoves(Board &board) override;
 };
 
 

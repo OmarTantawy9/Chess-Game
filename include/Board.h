@@ -6,6 +6,8 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <algorithm>
+#include <utility>
 
 using ChessPiecePtr = std::shared_ptr<ChessPiece>;
 
@@ -14,6 +16,8 @@ class Board {
     std::vector<std::vector<ChessPiecePtr>> board;
     std::vector<ChessPiecePtr> whiteGraveYard;
     std::vector<ChessPiecePtr> blackGraveYard;
+    ChessPiecePtr whiteKing;
+    ChessPiecePtr blackKing;
     bool isWhiteTurn;
     bool isGameOverFlag;
     std::string winner;
@@ -28,36 +32,25 @@ public:
         return board[row][col]; 
     }
 
-    inline std::string getPlayerTurn() const { return isWhiteTurn ? "white" : "black" ;} 
+    inline std::string getPlayerTurn() const { return isWhiteTurn ? "white" : "black" ;}
+    inline ChessPiecePtr getKing(const std::string &kingColor) {return kingColor == "white" ? whiteKing : blackKing;}
+    
     inline void switchTurn(){isWhiteTurn = !isWhiteTurn;} 
-    // inline bool isGameOver() const { return isGameOverFlag;}  
-    inline std::string getWinner() const { return winner;}    
+    inline std::string getWinner() const { return winner;}  
+    
+    bool isInCheck(const ChessPiecePtr &king);
 
 
     bool isGameOver() {
 
-        int possibleMoves = 0;
-
-        for(const auto &pieces : board) {
-            for(const auto &piece : pieces){
-                if(piece && piece->getColor() == getPlayerTurn() && typeid(*piece) != typeid(KingPiece)) 
-                    possibleMoves += piece->getValidMoves(*this).size();
-            }
-        }
-
-        if(!possibleMoves){
-            isGameOverFlag = true;
-            winner = isWhiteTurn ? "Black Player" : "White Player";
-        }
-        
-        return !possibleMoves;
+        return false;
     }  
 
 
 
     bool isPathClear(int startRow, int startCol, int endRow, int endCol) const;
-    bool isUnderAttack(int row, int col, const std::string &color) const;
-    bool wouldLeaveKingInCheck(const ChessPiece &piece, int newRow, int newCol) const;
+    // bool isUnderAttack(int row, int col, const std::string &color) const;
+    bool wouldLeaveKingInCheck(ChessPiece &piece, int newRow, int newCol);
     ChessPiecePtr findKing(const std::string &kingColor) const;
 
     inline void movePiece(const int &oldRow, const int &oldCol, const int &newRow, const int &newCol){

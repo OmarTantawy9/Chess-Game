@@ -6,27 +6,22 @@ RookPiece::RookPiece(int row, int col, std::string color)
 
 RookPiece::~RookPiece() = default;
 
-bool RookPiece::isValidMove(const int &row, const int &col, const Board &board) {
+bool RookPiece::isValidMove(const int &row, const int &col, Board &board) {
 
-    if (row == this->row && col == this->col) return false; // No movement
+    if (isSamePosition(row, col)) return false; // No movement
 
     // Ensure the move is within the board bounds
-    if (row < 0 || row > 7 || col < 0 || col > 7) return false;
+    if (isOutOfBoard(row, col)) return false;
 
     // Rook moves only in a straight line (either same row or same column)
-    bool isStraightMove = (this->row == row || this->col == col);
-    if (!isStraightMove) return false;
-
+    if (!isStarightMove(row, col)) return false;
 
     // Check if path is clear (no pieces in the way)
     if (!board.isPathClear(this->row, this->col, row, col)) return false;
 
-
     // Check if the destination square is occupied
     auto targetPiece = board.getPieceAt(row, col);
-    if (targetPiece && targetPiece->getColor() == color) {
-        return false;  // Cannot capture a friendly piece
-    }
+    if (isOccupiedByTeamMate(row, col, board)) return false;  // Cannot capture a friendly piece
 
     if (board.wouldLeaveKingInCheck(*this, row, col)) return false;
 
@@ -48,7 +43,7 @@ void RookPiece::moveTo(const int &row, const int &col, Board &board) {
 }
 
 
-ValidMoves RookPiece::getValidMoves(const Board &board){
+ValidMoves RookPiece::getValidMoves(Board &board){
     
     ValidMoves validMoves;
     
@@ -73,9 +68,4 @@ ValidMoves RookPiece::getValidMoves(const Board &board){
     }
     
     return validMoves;
-}
-
-bool RookPiece::isThreatening(const int &row, const int &col, const Board& board) const {
-    bool isStraight = this->row == row || this->col == col;
-    return isStraight && board.isPathClear(this->row, this->col, row, col);
 }

@@ -6,52 +6,20 @@ PawnPiece::PawnPiece(int row, int col, std::string color)
 
 PawnPiece::~PawnPiece() = default;
 
-bool PawnPiece::isValidMove(const int &row, const int &col, const Board &board) {
-    int dir = (color == "white") ? -1 : 1;
-    int startRow = (color == "white") ? 6 : 1;
+bool PawnPiece::isValidMove(const int &row, const int &col, Board &board) {
+    
+    if(isSamePosition(row, col)) return false;
 
-    if (row < 0 || row > 7 || col < 0 || col > 7 || (row == this->row && col == this->col)) return false;
+    if(isOutOfBoard(row, col)) return false;
 
-    int rowDiff = row - this->row;
-    int colDiff = col - this->col;
+    if(isOccupiedByTeamMate(row, col, board)) return false;
 
-    auto forwardOne = board.getPieceAt(row, col);
-    auto forwardTwo = board.getPieceAt(this->row + dir, col);
-
-    // Normal forward
-    if (colDiff == 0 && rowDiff == dir && !forwardOne) {
-        return !board.wouldLeaveKingInCheck(*this, row, col);
-    }
-
-    // Double move
-    if (colDiff == 0 && rowDiff == 2 * dir && this->row == startRow &&
-        !forwardTwo && !forwardOne) {
-        return !board.wouldLeaveKingInCheck(*this, row, col);
-    }
-
-    // Capture
-    if (std::abs(colDiff) == 1 && rowDiff == dir) {
-        auto target = board.getPieceAt(row, col);
-        if (target && target->getColor() != color) {
-            return !board.wouldLeaveKingInCheck(*this, row, col);
-        }
-
-        // // En Passant
-        // if (board.isEnPassantPossible(this->row, this->col, row, col)) {
-        //     return true;
-        // }
-    }
-
-    return false;
+    if(!canCapturePiece(row, col, board) && !isForwardMove(row, col, board)) return false;
+    
+    if(board.wouldLeaveKingInCheck(*this, row, col)) return false;
+    
+    return true;
 }
-
-
-// // En Passant (special capture)
-    // if (std::abs(colDiff) == 1 && rowDiff == direction) {
-    //     if (board.isEnPassantMove(this->row, this->col, row, col, this->color)) {
-    //         return true;
-    //     }
-    // }
 
 void PawnPiece::moveTo(const int &row, const int &col, Board &board){
 
@@ -67,7 +35,7 @@ void PawnPiece::moveTo(const int &row, const int &col, Board &board){
     this->col = col;
 }
 
-ValidMoves PawnPiece::getValidMoves(const Board &board){
+ValidMoves PawnPiece::getValidMoves(Board &board){
     
     ValidMoves validMoves;
     
@@ -89,8 +57,69 @@ ValidMoves PawnPiece::getValidMoves(const Board &board){
     return validMoves;
 }
 
-bool PawnPiece::isThreatening(const int &row, const int &col, const Board& board) const {
-    int dir = (this->color == "white") ? -1 : 1;
-    return (row == this->row + dir) && (std::abs(col - this->col) == 1);
+    // bool PawnPiece::isForwardMove(const int &row, const int &col) const {
+    //     int direction = (color == "white") ? -1 : 1;       // White moves up, black moves down
+    //     int startRow = (color == "white") ? 6 : 1;         // Starting row for white and black pawns
+
+    //     int rowDiff = row - this->row;
+    //     int colDiff = col - this->col;
+
+    //     // Must move in same column (no sideways movement)
+    //     if (colDiff != 0) return false;
+
+    //     if (board.getPieceAt(row, col)) return false;
+
+    //     // Single forward move
+    //     if (rowDiff == direction) return true;
+
+    //     // Double forward move on first move only
+    //     if (this->row == startRow && rowDiff == 2 * direction) return true;
+
+    //     return false;     
+
+    // }   
+
+    bool PawnPiece::isForwardMove(const int &row, const int &col, const Board &board) const {
+        int direction = (color == "white") ? -1 : 1;       // White moves up, black moves down
+        int startRow = (color == "white") ? 6 : 1;         // Starting row for white and black pawns
+
+        int rowDiff = row - this->row;
+        int colDiff = col - this->col;
+
+        // Must move in same column (no sideways movement)
+        if (colDiff != 0) return false;
+
+        // Cannot move forward into an occupied square
+        if (board.getPieceAt(row, col)) return false;
+
+        // Single forward move
+        if (rowDiff == direction) return true;
+
+        // Double forward move on first move only
+        if (this->row == startRow && rowDiff == 2 * direction) {
+            int intermediateRow = this->row + direction;
+            if (!board.getPieceAt(intermediateRow, col)) {
+                return true;
+            }
+    }
+
+    return false;
 }
 
+
+bool PawnPiece::canCapturePiece(const int &row, const int &col, const Board &board) const {
+    int direction = (color == "white") ? -1 : 1;  // White moves up, black moves down
+
+    int rowDiff = row - this->row;
+    int colDiff = col - this->col;
+
+    // Must be moving diagonally forward by one square
+    if (rowDiff != direction || std::abs(colDiff) != 1) return false;
+
+    auto target = board.getPieceAt(row, col);
+    if (target && target->getColor() != this->color) {
+        return true;  // Valid capture
+    }
+
+    return false;
+}
